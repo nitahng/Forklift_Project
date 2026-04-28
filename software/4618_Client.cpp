@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 // ELEX 4618 Client Template project for BCIT
 // Created Oct 5, 2016 by Craig Hennessey
 // Last updated April 2022
@@ -11,7 +11,7 @@
 
 #include "Client.h"
 
-std::string server_ip = "127.0.0.1";
+std::string server_ip = "192.168.137.123";//rasppi ip
 int server_port = 4618;
 
 float timeout_start;
@@ -21,13 +21,19 @@ void print_menu()
 	std::cout << "\n***********************************";
 	std::cout << "\n* ELEX4618 Client Project";
 	std::cout << "\n***********************************";
-	std::cout << "\n(1) Send image command";
-	std::cout << "\n(2) Send other command";
+	std::cout << "\n(1) Turn system ON";
+	std::cout << "\n(2) Turn system OFF";
+	std::cout << "\n(3) Sort to BIN1";
+	std::cout << "\n(4) Sort to BIN2";
+	std::cout << "\n(5) Get system status";
+	std::cout << "\n(6) Get BIN1 count";
+	std::cout << "\n(7) Get BIN2 count";
+	std::cout << "\n(8) Get image";
 	std::cout << "\n(0) Exit";
 	std::cout << "\nCMD> ";
 }
 
-void send_command(CClient &client, std::string cmd)
+void send_command(CClient& client, std::string cmd)
 {
 	std::string str;
 
@@ -51,7 +57,6 @@ void send_command(CClient &client, std::string cmd)
 		{
 			if ((cv::getTickCount() - timeout_start) / cv::getTickFrequency() > 1000)
 			{
-				// No response, disconnect and reconnect
 				timeout_start = cv::getTickCount();
 				client.close_socket();
 				client.connect_socket(server_ip, server_port);
@@ -69,7 +74,6 @@ void send_command(CClient &client, std::string cmd)
 		{
 			if ((cv::getTickCount() - timeout_start) / cv::getTickFrequency() > 1000)
 			{
-				// No response, disconnect and reconnect
 				timeout_start = cv::getTickCount();
 				client.close_socket();
 				client.connect_socket(server_ip, server_port);
@@ -93,8 +97,25 @@ int main(int argc, char* argv[])
 
 		switch (cmd)
 		{
-		case 1: send_command(client, "im"); break;
-		case 2: send_command(client, "cmd2"); break;
+		case 1: send_command(client, "S 0 1\n"); break;
+		case 2: send_command(client, "S 0 0\n"); break;
+		case 3: send_command(client, "S 1 0\n"); break;
+		case 4: send_command(client, "S 1 1\n"); break;
+		case 5: send_command(client, "G 0\n"); break;
+		case 6: send_command(client, "G 1 0\n"); break;
+		case 7: send_command(client, "G 1 1\n"); break;
+
+		case 8:
+
+			while (true)
+			{
+				send_command(client, "im");
+
+				if (cv::waitKey(30) == 'q')
+					break;
+			}
+			break;
+
 		}
 	} while (cmd != 0);
 }

@@ -14,7 +14,7 @@
     <ProjectGuid>{DCDD96BA-F352-4902-95D6-3465EFA78738}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Lab_04_Template</RootNamespace>
-    <ProjectName>4618_Client</ProjectName>
+    <ProjectName>PC_CLIENT</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

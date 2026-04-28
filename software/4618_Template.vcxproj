@@ -14,7 +14,7 @@
     <ProjectGuid>{A32E4181-E68B-4E83-B81B-652ECAE7491E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Lab_04_Template</RootNamespace>
-    <ProjectName>4618_Template</ProjectName>
+    <ProjectName>PI_END</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -89,14 +89,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CCar.h" />
+    <ClInclude Include="CCommunication.h" />
+    <ClInclude Include="CGuidance.h" />
+    <ClInclude Include="CMotor.h" />
     <ClInclude Include="cvui.h" />
-    <ClInclude Include="Serial.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="4618_Template.cpp" />
-    <ClCompile Include="Serial.cpp" />
+    <ClCompile Include="CCar.cpp" />
+    <ClCompile Include="CCommunication.cpp" />
+    <ClCompile Include="CGuidance.cpp" />
+    <ClCompile Include="CMotor.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
