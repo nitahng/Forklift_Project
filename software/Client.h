@@ -36,6 +36,7 @@ private:
   WSADATA _wsdat;
 #endif
 
+  int mode;
   int _port;
   std::string _addr;
   SOCKET _socket;
@@ -44,7 +45,7 @@ private:
 
 public:
   CClient();
-	~CClient();
+  ~CClient();
 
   void connect_socket(std::string addr, int port);
   void close_socket();

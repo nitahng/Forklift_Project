@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <thread>
+#include <conio.h>
 
 #include "Client.h"
 
@@ -19,41 +20,40 @@ float timeout_start;
 void print_menu()
 {
 	std::cout << "\n***********************************";
-	std::cout << "\n* ELEX4618 Client Project";
+	std::cout << "\n Fork-Lift Operation";
 	std::cout << "\n***********************************";
-	std::cout << "\n(1) Turn system ON";
-	std::cout << "\n(2) Turn system OFF";
-	std::cout << "\n(3) Sort to BIN1";
-	std::cout << "\n(4) Sort to BIN2";
-	std::cout << "\n(5) Get system status";
-	std::cout << "\n(6) Get BIN1 count";
-	std::cout << "\n(7) Get BIN2 count";
-	std::cout << "\n(8) Get image";
-	std::cout << "\n(0) Exit";
+	std::cout << "\n(1) Manual Mode ";
+	std::cout << "\n(2) Auto Mode";
+	std::cout << "\n(0) Exit\n";
+
+
 	std::cout << "\nCMD> ";
 }
 
+//This Function sends a command from PC to PI. 
 void send_command(CClient& client, std::string cmd)
 {
+	//Sends command to PI
 	std::string str;
-
 	client.tx_str(cmd);
 	std::cout << "\nClient Tx: " << cmd;
 
-	if (cmd == "im")
+	
+	if (cmd == "im")//if "im" Make Image commands to return an image
 	{
-		cv::Mat im;
-		if (client.rx_im(im) == true)
+		cv::Mat im; 
+		if (client.rx_im(im) == true) //If image received
 		{
 			timeout_start = cv::getTickCount();
-			if (im.empty() == false)
+
+			if (im.empty() == false) //If image is present (not empty), then show image
 			{
 				std::cout << "\nClient Rx: Image received";
 				cv::imshow("rx", im);
 				cv::waitKey(10);
 			}
 		}
-		else
+		else //If not present, try connecting again 
 		{
 			if ((cv::getTickCount() - timeout_start) / cv::getTickFrequency() > 1000)
 			{
@@ -63,7 +63,8 @@ void send_command(CClient& client, std::string cmd)
 			}
 		}
 	}
-	else
+
+	else //get text rely from server then print, if no response then reconnect 
 	{
 		if (client.rx_str(str) == true)
 		{
@@ -85,37 +86,57 @@ void send_command(CClient& client, std::string cmd)
 int main(int argc, char* argv[])
 {
 	CClient client;
-	int cmd = -1;
 
 	timeout_start = cv::getTickCount();
 	client.connect_socket(server_ip, server_port);
 
-	do
-	{
-		print_menu();
-		std::cin >> cmd;
+	print_menu();
+	
+	while (1) {
+		if (_kbhit()) {
 
-		switch (cmd)
-		{
-		case 1: send_command(client, "S 0 1\n"); break;
-		case 2: send_command(client, "S 0 0\n"); break;
-		case 3: send_command(client, "S 1 0\n"); break;
-		case 4: send_command(client, "S 1 1\n"); break;
-		case 5: send_command(client, "G 0\n"); break;
-		case 6: send_command(client, "G 1 0\n"); break;
-		case 7: send_command(client, "G 1 1\n"); break;
+			char cmd = _getch();
 
-		case 8:
 
-			while (true)
+			switch (cmd)
 			{
-				send_command(client, "im");
 
-				if (cv::waitKey(30) == 'q')
-					break;
+			case 'w':
+			case 'W': send_command(client, "FORWARD\n");
+				break;
+
+			case 'd':
+			case 'D': send_command(client, "RIGHT\n"); \
+				break;
+
+			case 'a':
+			case 'A': send_command(client, "LEFT\n");
+				break;
+
+			case 's':
+			case 'S': send_command(client, "BACK\n");
+				break;
+
+			case 'e':
+			case 'E':
+
+				while (true)
+				{
+					send_command(client, "im");
+
+					if (cv::waitKey(30) == 'q')
+						break;
+				}
+				break;
+
 			}
-			break;
+
 
 		}
-	} while (cmd != 0);
+
+	}
+
+
+
+	
 }
