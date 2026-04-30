@@ -7,7 +7,6 @@ class CCommunication
 
 private:
 
-	int handle;
 	CServer server;
 
 public:

@@ -12,7 +12,7 @@
 
 #include "Client.h"
 
-std::string server_ip = "192.168.137.123";//rasppi ip
+std::string server_ip = "192.168.137.123"; 
 int server_port = 4618;
 
 float timeout_start;
@@ -102,19 +102,19 @@ int main(int argc, char* argv[])
 			{
 
 			case 'w':
-			case 'W': send_command(client, "FORWARD\n");
+			case 'W': send_command(client, "W\n");
 				break;
 
 			case 'd':
-			case 'D': send_command(client, "RIGHT\n"); \
+			case 'D': send_command(client, "D\n"); \
 				break;
 
 			case 'a':
-			case 'A': send_command(client, "LEFT\n");
+			case 'A': send_command(client, "A\n");
 				break;
 
 			case 's':
-			case 'S': send_command(client, "BACK\n");
+			case 'S': send_command(client, "S\n");
 				break;
 
 			case 'e':

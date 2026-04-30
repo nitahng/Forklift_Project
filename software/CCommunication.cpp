@@ -9,6 +9,7 @@
 
 CCommunication::CCommunication() {
 
+	server.start(4618);
 
 }
 
@@ -21,7 +22,7 @@ CCommunication::~CCommunication() {
 //Transmission from Pi to PC (Client)
 void CCommunication::sendimage(cv::Mat frame) {
 
-	server.set_txin(frame);
+	server.set_txim(frame);
 
 }
 
