@@ -5,6 +5,10 @@
 ////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
+#define WIN32_LEAN_AND_MEAN
+#define _WINSOCKAPI_   // stops Windows.h from including old winsock.h
+#include <windows.h>
+
 #include <string>
 #include <iostream>
 #include <thread>
@@ -12,7 +16,9 @@
 
 #include "Client.h"
 
-std::string server_ip = "192.168.137.123"; 
+#define MASK 0x8000
+
+std::string server_ip = "10.0.0.33"; 
 int server_port = 4618;
 
 float timeout_start;
@@ -91,52 +97,38 @@ int main(int argc, char* argv[])
 	client.connect_socket(server_ip, server_port);
 
 	print_menu();
-	
-	while (1) {
-		if (_kbhit()) {
 
-			char cmd = _getch();
+	char last_cmd = 'X';
 
+	while (1)
+	{
+		char cmd = 'X';
 
-			switch (cmd)
-			{
+		if (GetAsyncKeyState('W') & MASK) //AND MASK returns either 1:pressed or 0:not pressed 
+			cmd = 'W';
+		else if (GetAsyncKeyState('S') & MASK)
+			cmd = 'S';
+		else if (GetAsyncKeyState('A') & MASK)
+			cmd = 'A';
+		else if (GetAsyncKeyState('D') & MASK)
+			cmd = 'D';
+		else if (GetAsyncKeyState('E') & MASK)//servos up
+			cmd = 'E';
+		else if (GetAsyncKeyState('Q') & MASK)//servos down
+			cmd = 'Q';
 
-			case 'w':
-			case 'W': send_command(client, "W\n");
-				break;
+		if (cmd != last_cmd)
+		{
+			std::string msg;
+			msg += cmd;
+			msg += "\n";
 
-			case 'd':
-			case 'D': send_command(client, "D\n"); \
-				break;
-
-			case 'a':
-			case 'A': send_command(client, "A\n");
-				break;
-
-			case 's':
-			case 'S': send_command(client, "S\n");
-				break;
-
-			case 'e':
-			case 'E':
-
-				while (true)
-				{
-					send_command(client, "im");
-
-					if (cv::waitKey(30) == 'q')
-						break;
-				}
-				break;
-
-			}
-
-
+			client.tx_str(msg);
+			last_cmd = cmd;
 		}
 
+
 	}
-
-
 
 	
 }
