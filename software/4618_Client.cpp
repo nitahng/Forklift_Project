@@ -19,7 +19,8 @@
 #define MASK 0x8000
 
 std::string server_ip = "10.0.0.33"; 
-int server_port = 4618;
+int server_port = 4012;
+int camera_port = 5012;
 
 float timeout_start;
 
@@ -36,72 +37,51 @@ void print_menu()
 	std::cout << "\nCMD> ";
 }
 
-//This Function sends a command from PC to PI. 
-void send_command(CClient& client, std::string cmd)
-{
-	//Sends command to PI
-	std::string str;
-	client.tx_str(cmd);
-	std::cout << "\nClient Tx: " << cmd;
 
+void get_image(CClient& client) {
+
+	cv::Mat im;
+	client.tx_str("im");   // request image from Pi server
+	if (client.rx_im(im) == true) //If image received
+	{
+		timeout_start = cv::getTickCount();
+
+		if (im.empty() == false) //If image is present (not empty), then show image
+		{
+
+			cv::imshow("rx", im);
+			cv::waitKey(10);
+		}
+	}
+	else //If not present, try connecting again 
+	{
+		if ((cv::getTickCount() - timeout_start) / cv::getTickFrequency() > 1)
+		{
+			timeout_start = cv::getTickCount();
+			client.close_socket();
+			client.connect_socket(server_ip, server_port);
+		}
+	}
 	
-	if (cmd == "im")//if "im" Make Image commands to return an image
-	{
-		cv::Mat im; 
-		if (client.rx_im(im) == true) //If image received
-		{
-			timeout_start = cv::getTickCount();
 
-			if (im.empty() == false) //If image is present (not empty), then show image
-			{
-				std::cout << "\nClient Rx: Image received";
-				cv::imshow("rx", im);
-				cv::waitKey(10);
-			}
-		}
-		else //If not present, try connecting again 
-		{
-			if ((cv::getTickCount() - timeout_start) / cv::getTickFrequency() > 1000)
-			{
-				timeout_start = cv::getTickCount();
-				client.close_socket();
-				client.connect_socket(server_ip, server_port);
-			}
-		}
-	}
-
-	else //get text rely from server then print, if no response then reconnect 
-	{
-		if (client.rx_str(str) == true)
-		{
-			timeout_start = cv::getTickCount();
-			std::cout << "\nClient Rx: " << str;
-		}
-		else
-		{
-			if ((cv::getTickCount() - timeout_start) / cv::getTickFrequency() > 1000)
-			{
-				timeout_start = cv::getTickCount();
-				client.close_socket();
-				client.connect_socket(server_ip, server_port);
-			}
-		}
-	}
 }
 
 int main(int argc, char* argv[])
 {
-	CClient client;
+	CClient control_client;
+	CClient cam_client;
 
 	timeout_start = cv::getTickCount();
-	client.connect_socket(server_ip, server_port);
+	control_client.connect_socket(server_ip, server_port);
 
 	print_menu();
 
+
 	char last_cmd = 'X';
 
-	while (1)
+	while (true)
 	{
+
 		char cmd = 'X';
 
 		if (GetAsyncKeyState('W') & MASK) //AND MASK returns either 1:pressed or 0:not pressed 
@@ -112,9 +92,9 @@ int main(int argc, char* argv[])
 			cmd = 'A';
 		else if (GetAsyncKeyState('D') & MASK)
 			cmd = 'D';
-		else if (GetAsyncKeyState('E') & MASK)//servos up
+		else if (GetAsyncKeyState('E') & MASK)//servos down
 			cmd = 'E';
-		else if (GetAsyncKeyState('Q') & MASK)//servos down
+		else if (GetAsyncKeyState('Q') & MASK)//servos up
 			cmd = 'Q';
 
 		if (cmd != last_cmd)
@@ -123,10 +103,14 @@ int main(int argc, char* argv[])
 			msg += cmd;
 			msg += "\n";
 
-			client.tx_str(msg);
+			control_client.tx_str(msg);
 			last_cmd = cmd;
 		}
 
+
+		get_image(cam_client);
+
+		cv::waitKey(1);
 
 	}
 
