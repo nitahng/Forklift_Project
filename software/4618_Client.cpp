@@ -18,7 +18,10 @@
 
 #define MASK 0x8000
 
-std::string server_ip = "10.0.0.33"; 
+std::string server_ip = "192.168.137.123"; 
+//
+//at home 10.0.0.33
+
 int server_port = 4012;
 int camera_port = 5012;
 
@@ -29,8 +32,8 @@ void print_menu()
 	std::cout << "\n***********************************";
 	std::cout << "\n Fork-Lift Operation";
 	std::cout << "\n***********************************";
-	std::cout << "\n(1) Manual Mode ";
-	std::cout << "\n(2) Auto Mode";
+	std::cout << "\nControl with WSAD keys to move. E to lift Fork. Q to lower Fork.";
+	std::cout << "\nPress U for Autonomous";
 	std::cout << "\n(0) Exit\n";
 
 
@@ -41,7 +44,6 @@ void print_menu()
 void get_image(CClient& client) {
 
 	cv::Mat im;
-	client.tx_str("im");   // request image from Pi server
 	if (client.rx_im(im) == true) //If image received
 	{
 		timeout_start = cv::getTickCount();
@@ -50,16 +52,17 @@ void get_image(CClient& client) {
 		{
 
 			cv::imshow("rx", im);
-			cv::waitKey(10);
+			cv::waitKey(1);
 		}
 	}
+
 	else //If not present, try connecting again 
 	{
-		if ((cv::getTickCount() - timeout_start) / cv::getTickFrequency() > 1)
+		if ((cv::getTickCount() - timeout_start) / cv::getTickFrequency() > 5.0)
 		{
 			timeout_start = cv::getTickCount();
 			client.close_socket();
-			client.connect_socket(server_ip, server_port);
+			client.connect_socket(server_ip, camera_port);
 		}
 	}
 	
@@ -72,7 +75,11 @@ int main(int argc, char* argv[])
 	CClient cam_client;
 
 	timeout_start = cv::getTickCount();
+
+	
 	control_client.connect_socket(server_ip, server_port);
+	cam_client.connect_socket(server_ip, camera_port);
+
 
 	print_menu();
 
@@ -96,6 +103,15 @@ int main(int argc, char* argv[])
 			cmd = 'E';
 		else if (GetAsyncKeyState('Q') & MASK)//servos up
 			cmd = 'Q';
+		else if (GetAsyncKeyState('U') & MASK)//servos up
+			cmd = 'U';
+		else if (GetAsyncKeyState('C') & MASK) {
+			control_client.close_socket();
+			cam_client.close_socket();
+			Sleep(1000);
+			control_client.connect_socket(server_ip, server_port);
+			cam_client.connect_socket(server_ip, camera_port);
+		}
 
 		if (cmd != last_cmd)
 		{
@@ -108,9 +124,17 @@ int main(int argc, char* argv[])
 		}
 
 
-		get_image(cam_client);
+		static double last_img_time = 0;
+		double now = cv::getTickCount() / cv::getTickFrequency();
+
+		if (now - last_img_time > 0.05)
+		{
+			get_image(cam_client);
+			last_img_time = now;
+		}
 
 		cv::waitKey(1);
+		Sleep(5);
 
 	}
 

@@ -3647,17 +3647,6 @@
 		)
 		(uuid "385ccca2-db96-4d5b-9f2b-869b8a5f22e1")
 	)
-	(label "VM"
-		(at 93.98 27.94 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "3ac55228-94d2-4f62-9181-402d4e4e8c9c")
-	)
 	(label "GPIO16"
 		(at 100.33 71.12 180)
 		(fields_autoplaced yes)
