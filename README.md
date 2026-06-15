@@ -1,5 +1,5 @@
 # Forklift_Project 
-By Anita Huang and Gabriel Yuen
+By Anita Huang
 
 Raspberry-Pi Based Forklift Operation 
 
